@@ -29,7 +29,7 @@ class Graph {
     const nodes = new DataSet(
       Array.from({ length: this.length }, (_, index) => ({
         id: index,
-        label: `Node ${index + 1}`,
+        label: `Node ${index}`,
       }))
     );
 
