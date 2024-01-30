@@ -1,4 +1,4 @@
-import { FC, LegacyRef, Ref, useEffect, useRef, useState } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Icons } from "../../components/Icons";
 
@@ -12,13 +12,20 @@ const Project: FC<ProjectProps> = ({}) => {
   const navigate = useNavigate();
   const ref: React.MutableRefObject<HTMLDivElement | null> = useRef(null);
 
-  //   useEffect(() => {}, []);
   const [toggleExit, setToggleExit] = useState(false);
   const [numberOfNodes, setNumberOfNodes] = useState(0);
   const [toggleNumberOfNodes, setToggleNumberOfNodes] = useState(true);
+  const [toggleAddEdge, setToggleAddEdge] = useState(false);
+
+  const [graph, setGraph] = useState<Graph | null>(null);
+
+  const [fromNode, setFromNode] = useState(0);
+  const [toNode, setToNode] = useState(0);
+  const [weight, setWeight] = useState(1);
 
   useEffect(() => {
     const graph = new Graph(numberOfNodes);
+    setGraph(graph);
     graph.visualizeGraph(ref.current!);
   }, [numberOfNodes]);
 
@@ -55,6 +62,67 @@ const Project: FC<ProjectProps> = ({}) => {
           </div>
         </div>
       )}
+
+      {toggleAddEdge && (
+        <div className="z-40 fixed top-0 left-0 w-full h-screen bg-black bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white rounded-md p-4 relative">
+            <button
+              onClick={() => {
+                setToggleAddEdge((prev) => !prev);
+              }}
+              className="absolute -top-2 -right-2 shadow-md rounded-md shadow-slate-800 bg-white p-2 hover:bg-red-600 hover:text-white"
+            >
+              <Icons.close className="w-5 h-5" />
+            </button>
+            <Input
+              value={fromNode.toString()}
+              onChange={(event) => {
+                setFromNode(parseInt(event.target.value));
+              }}
+              label="from node"
+              placeholder="from node"
+              type="number"
+            />
+
+            <Input
+              value={toNode.toString()}
+              onChange={(event) => {
+                setToNode(parseInt(event.target.value));
+              }}
+              label="to node"
+              placeholder="to node"
+              type="number"
+            />
+
+            <Input
+              value={weight.toString()}
+              onChange={(event) => {
+                setWeight(parseInt(event.target.value));
+              }}
+              label="weight"
+              placeholder="weight"
+              type="number"
+            />
+            <button
+              onClick={() => {
+                graph?.addEdge(fromNode, toNode, weight);
+                setFromNode(0);
+                setToNode(0);
+                setWeight(1);
+                graph?.visualizeGraph(ref.current!);
+                setToggleAddEdge((prev) => !prev);
+              }}
+              className="w-full p-2 bg-slate-900 text-white rounded-md mt-2"
+            >
+              Link
+            </button>
+
+            <div className="flex justify-end gap-4"></div>
+          </div>
+        </div>
+      )}
+
+      {}
 
       {toggleExit && (
         <div className="z-50 fixed top-0 left-0 w-full h-screen bg-black bg-opacity-50 flex justify-center items-center">
@@ -98,11 +166,18 @@ const Project: FC<ProjectProps> = ({}) => {
         <h1 className="text-white font-semibold text-4xl">{title}</h1>
       </div>
 
-      <div className="fixed bottom-4 right-4 bg-white p-2 rounded-md">
-        <button className="w-10 h-10 flex justify-center items-center bg-slate-900 text-white rounded-md">
-          <Icons.plus />
-        </button>
-      </div>
+      {numberOfNodes > 0 && !toggleNumberOfNodes && (
+        <div className="z-40 fixed bottom-4 right-4 bg-white p-2 rounded-md">
+          <button
+            onClick={() => {
+              setToggleAddEdge((prev) => !prev);
+            }}
+            className="w-10 h-10 flex justify-center items-center bg-slate-900 text-white rounded-md"
+          >
+            <Icons.edge />
+          </button>
+        </div>
+      )}
       <div ref={ref} className="h-screen"></div>
     </div>
   );
